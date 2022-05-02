@@ -81,5 +81,5 @@ exports.OFFER = async ({ $, request }) => {
 		}
 	}
 
-	await tools.sendEmail('lukas@apify.com');
+	await tools.sendEmail(input.email);
 };
