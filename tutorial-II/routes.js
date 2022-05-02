@@ -1,36 +1,42 @@
 const Apify = require("apify");
-const tools = require("./tools");
 const {
 	utils: { log },
 } = Apify;
 
-exports.SEARCH = async ({ $, request }, { requestQueue }) => {
-	const products = $("div[data-asin][data-component-type*=search-result]");
+require('dotenv').config();
 
-	for (const product of products) {
-		let asin = $(product).attr("data-asin");
+exports.SEARCH = async ({ $ }, { requestQueue }) => {
+	const items = $("div[data-asin][data-component-type*=search-result]");
+
+	log.info(`Processing ${items.length} items...`);
+
+	for (const item of items) {
+		let asin = $(item).attr("data-asin");
+
+		log.info(`Adding ${asin} item to requestQueue...`);
+
 		requestQueue.addRequest({
 			url: `https://www.amazon.com/dp/${asin}`,
 			userData: {
-				label: "PRODUCT",
+				label: "ITEM",
 				asin,
 			},
 		});
 	}
 };
 
-exports.PRODUCT = async ({ $, request }, { requestQueue }) => {
+exports.ITEM = async ({ $, request }, { requestQueue }) => {
 	let asin = request.userData.asin;
-
-    log.info(`Adding OFFER for ${asin} to requestQueue...`);
 
 	const descriptionElements = $('#feature-bullets ul.a-unordered-list li:not([class*="hidden"]) .a-list-item');
 	let description = '';
-	
+
 	for (const element of descriptionElements) {
 		description += $(element).text().trim() + '\n';
 	}
-	
+
+	log.info(`Adding ${asin} item offers to requestQueue...`);
+
 	requestQueue.addRequest({
 		url: `https://www.amazon.com/gp/offer-listing/${asin}`,
 		userData: {
@@ -44,12 +50,10 @@ exports.PRODUCT = async ({ $, request }, { requestQueue }) => {
 };
 
 exports.OFFER = async ({ $, request }) => {
-	log.info("Scraping OFFERS...");
 	const input = await Apify.getInput();
-
 	const dataset = await Apify.openDataset();
 
-	log.info("Pushing data to dataset...");
+	log.info("Pushing offers to dataset...");
 
 	// Push pinned offer
 	await dataset.pushData({
@@ -80,6 +84,4 @@ exports.OFFER = async ({ $, request }) => {
 			});
 		}
 	}
-
-	await tools.sendEmail(input.email);
 };

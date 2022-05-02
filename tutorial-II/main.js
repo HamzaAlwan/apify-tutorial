@@ -5,10 +5,9 @@ const {
 	utils: { log },
 } = Apify;
 
+require('dotenv').config();
 
 Apify.main(async () => {
-	log.info('Starting actor.');
-    
     const input = await Apify.getInput();
     if (!input.keyword || !input.keyword.trim()) throw new Error('Please provide a keyword.');
     
@@ -24,12 +23,6 @@ Apify.main(async () => {
 
     const crawler = new Apify.PuppeteerCrawler({
 		requestQueue,
-
-        launchContext: {
-            launchOptions: {
-                headless: true,
-            },
-        },
 
         browserPoolOptions: {
             useFingerprints: true,
@@ -54,17 +47,18 @@ Apify.main(async () => {
 
 			const $ = cheerio.load(await page.content());
 
-			log.info(`Processing ${request.userData.label} : ${request.url}`);
 			await router(request.userData.label, { $, request });
 		},
         // This function is called if the page processing failed more than maxRequestRetries+1 times.
         handleFailedRequestFunction: async ({ request, error}) => {
-            log.debug(`Request ${request.url} failed twice.`);
-            log.error(error);
+            log.error(`Request ${request.url} failed twice.`, error);
         },
     });
 
     log.info("Starting the crawl.");
 	await crawler.run();
+
+    await tools.sendEmail(input.email);
+    
 	log.info("Actor finished.");
 });
