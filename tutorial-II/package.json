@@ -4,7 +4,7 @@
 	"description": "Tutorial II Apify SDK",
 	"dependencies": {
 		"apify": "^2.3.0",
-		"puppeteer": "^13.7.0"
+		"puppeteer": "*"
 	},
 	"scripts": {
 		"start": "node main.js",
