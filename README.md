@@ -16,3 +16,33 @@
     - Using `$eval`, `$$eval` functions.
 - What is the default concurrency/parallelism the SDK uses?
     - `AutoscaledPool`.
+
+## Tutorial III Apify SDK:
+
+- How do you allocate more CPU for your actor run?
+    - By allocating more memory for the actor, every CPU core corresponds to 4 GB of memory.
+- How can you get the exact time when the actor was started from within the running actor process?
+    - `const { startedAt } = await Apify.getEnv()`
+- Which are the default storages an actor run is allocated (connected to)?
+    - `apify_storage/key_value_stores/default`
+- Can you change the memory allocated to a running actor?
+    - No I can't, it can be automatically increased by the `Autoscaling` provided by Apify, but it only applies to solutions that run multiple tasks (URLs) for at least 30 seconds.
+- How can you run an actor with Puppeteer in a headful (non-headless) mode?
+    - By adding `APIFY_HEADLESS=0` environment variable, or by passing to Puppeteer the following (which is the default):
+    ```launchContext: {
+            launchOptions: {
+                headless: false,
+            },
+    ```.
+- Imagine the server/instance the container is running on has a 32 GB, 8-core CPU. What would be the most performant (speed/cost) memory allocation for CheerioCrawler? (Hint: NodeJS processes cannot use user-created threads)
+    - 4GB, 1-core CPU.
+
+- What is the difference between RUN and CMD Dockerfile commands?
+    - The `RUN` command: triggers while building the docker image, it runs a command and commits the result.
+    - The `CMD` command: triggers while launching the created docker image, it does not execute anything at build time, but specifies the intended command for the image.
+    
+- Does your Dockerfile need to contain a CMD command (assuming we don't want to use ENTRYPOINT which is similar)? If yes or no, why?
+    -
+- How does the FROM command work and which base images Apify provides?
+    - The `FROM` command initializes a new build stage and sets the `Base Image` for subsequent instructions.
+    - Apify provide NodeJs images.

@@ -1,0 +1,23 @@
+{
+  "title": "Amazon Crawler Tutorial",
+  "description": "Crawl all the offers for the first page of results based on keyword.",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+      "keyword": {
+          "title": "Keyword",
+          "type": "string",
+          "description": "Enter a search keyword",
+          "editor": "textfield",
+          "prefill": "phone"
+      },
+      "email": {
+        "title": "Email",
+        "type": "string",
+        "description": "Enter email to send the results to.",
+        "editor": "textfield",
+        "prefill": "ihamzaalwan@gmail.com"
+    }
+  },
+  "required": ["keyword"]
+}

@@ -19,14 +19,17 @@ exports.sendEmail = async (email) => {
     log.info(`Sending email to '${email}'...`);
 
     const dataset = await Apify.openDataset();
-    
-    const datasetInfo = await dataset.getInfo();
-    const datasetUrl = `https://api.apify.com/v2/datasets/${datasetInfo.id}/items?clean=true&format=json`;
-    
+
+    const { id } = await dataset.getInfo();
+    const datasetUrl = `https://api.apify.com/v2/datasets/${ id }/items?clean=true&format=json`;
+
     await Apify.call('apify/send-mail', {
         to: email,
         subject: 'Hamza Alwan - This is for the Apify SDK exercise',
-        html: `You can find the url for SDK Tutorial II <a href="${datasetUrl}">here</a>`,
+        html: `You can find the url for SDK Tutorial II <a href="${ datasetUrl }">here</a>`,
+    }).catch(err => {
+        log.error(`Error while sending email`);
+        throw new Error(err);
     });
 
     log.info('Email sent.');

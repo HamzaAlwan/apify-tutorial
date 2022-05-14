@@ -13,7 +13,7 @@ exports.SEARCH = async ({ $ }, { requestQueue }) => {
 	for (const item of items) {
 		let asin = $(item).attr("data-asin");
 
-		log.info(`Adding ${asin} item to requestQueue...`);
+		log.info(`[ITEM]: Adding ${asin} item to requestQueue...`);
 
 		requestQueue.addRequest({
 			url: `https://www.amazon.com/dp/${asin}`,
@@ -28,60 +28,65 @@ exports.SEARCH = async ({ $ }, { requestQueue }) => {
 exports.ITEM = async ({ $, request }, { requestQueue }) => {
 	let asin = request.userData.asin;
 
-	const descriptionElements = $('#feature-bullets ul.a-unordered-list li:not([class*="hidden"]) .a-list-item');
-	let description = '';
-
-	for (const element of descriptionElements) {
-		description += $(element).text().trim() + '\n';
-	}
-
-	log.info(`Adding ${asin} item offers to requestQueue...`);
+	log.info(`[OFFERS]: Adding ${asin} item offers to requestQueue...`);
 
 	requestQueue.addRequest({
 		url: `https://www.amazon.com/gp/offer-listing/${asin}`,
 		userData: {
-			label: "OFFER",
+			label: "OFFERS",
 			url: request.loadedUrl,
 			title: $("#productTitle").text().trim(),
-			description,
+			description: $("#productDescription p").text().trim(),
+			// I noticed that there is no shiiping price for the pinned offer when you go to the offers page, so I get it from the item page.
 			pinnedOfferShippingPrice: $("#amazonGlobal_feature_div > span.a-size-base.a-color-secondary").text().trim().split(' ')[0] || null,
 		},
 	});
 };
 
-exports.OFFER = async ({ $, request }) => {
-	const input = await Apify.getInput();
+exports.OFFERS = async ({ $, request }) => {
+	const { keyword } = await Apify.getInput();
 	const dataset = await Apify.openDataset();
+
+	const {
+		userData: { url, title, description, pinnedOfferShippingPrice },
+	} = request;
 
 	log.info("Pushing offers to dataset...");
 
-	// Push pinned offer
-	await dataset.pushData({
-		url: request.userData.url,
-		title: request.userData.title,
-		description: request.userData.description,
-		keyword: input.keyword.trim(),
-		sellerName: $('#aod-pinned-offer #aod-offer-soldBy [aria-label*="Opens a new page"]').text().trim(),
-		price: $(`#aod-pinned-offer [id*="aod-price"] span.a-offscreen`).text().trim(),
-		shippingPrice: request.userData.pinnedOfferShippingPrice,
-	});
+	// Pinned offer
+	let result = {
+		url,
+		title,
+		description,
+		keyword: keyword.trim(),
+		offersUrl: request.loadedUrl,
+		offers: [{
+			sellerName: $('#aod-pinned-offer #aod-offer-soldBy [aria-label*="Opens a new page"]').text().trim(),
+			price: $(`#aod-pinned-offer [id*="aod-price"] span.a-offscreen`).text().trim(),
+			shippingPrice: pinnedOfferShippingPrice,
+		}]
+	}
 
 	let offers = $("#all-offers-display #aod-offer-list #aod-offer");
 
 	if (offers.length) {
 		for (const offer of offers) {
-			const shippingPrice = $(offer)
-				.find("[data-csa-c-delivery-price]")
-				.attr("data-csa-c-delivery-price");
-			await dataset.pushData({
-				url: request.userData.url,
-				title: request.userData.title,
-				description: request.userData.description,
-				keyword: input.keyword.trim(),
-				sellerName: $(offer).find('#aod-offer-soldBy [aria-label*="Opens a new page"]').text().trim(),
-				price: $(offer).find(`[id*="aod-price"] span.a-offscreen`).text().trim(),
-				shippingPrice: shippingPrice ? shippingPrice.trim() || null : null
-			});
+			const sellerName = $(offer).find('#aod-offer-soldBy [aria-label*="Opens a new page"]').text().trim();
+			if (sellerName) {
+				const shippingPrice = $(offer)
+					.find("[data-csa-c-delivery-price]")
+					.attr("data-csa-c-delivery-price");
+
+				result.offers.push({
+					sellerName,
+					price: $(offer).find(`[id*="aod-price"] span.a-offscreen`).text().trim(),
+					shippingPrice: shippingPrice ? shippingPrice.trim() || null : null
+				});
+			}
 		}
+	}
+
+	if (result.offers.length) {
+		await dataset.pushData(result);
 	}
 };
