@@ -11,9 +11,12 @@ Apify.main(async () => {
     const { datasetId } = await Apify.getInput();
     const dataset = await Apify.openDataset(datasetId);
 
-    const { products } = await dataset.getData();
+    const { items } = await dataset.getData();
 
-    for (const product of products) {
+    log.info(`Processing ${items.length} items...`);
+    log.info(`Items type is ${typeof items}`);
+
+    for (const product of items) {
         let cheapest;
         for (const offer in product.offers) {
             const price = +offer.price.slice(1);
@@ -24,5 +27,5 @@ Apify.main(async () => {
         product.offers = [cheapest];
     }
 
-    await Apify.pushData(products);
+    await Apify.pushData(items);
 });
