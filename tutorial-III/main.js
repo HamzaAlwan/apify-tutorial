@@ -14,14 +14,13 @@ Apify.main(async () => {
     const { items } = await dataset.getData();
 
     log.info(`Processing ${items.length} items...`);
-    log.info(`Items type is ${typeof items}`);
 
     for (const product of items) {
         let cheapest;
         for (const offer in product.offers) {
-            const price = +offer.price.slice(1);
+            const price = offer.price ? +offer.price.slice(1) : null;
 
-            if (!cheapest || price < cheapest.price) cheapest = offer;
+            if (!cheapest || (price && price < cheapest.price)) cheapest = offer;
         }
 
         product.offers = [cheapest];
