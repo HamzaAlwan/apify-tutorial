@@ -1,0 +1,34 @@
+{
+  "title": "Amazon actor task caller",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "memory": {
+      "title": "Memory",
+      "type": "integer",
+      "description": "Select memory in megabytes.",
+      "default": 4096,
+      "unit": "MB"
+    },
+    "useClient": {
+      "title": "Use client?",
+      "type": "boolean",
+      "description": "Use Apify client or API.",
+      "default": true
+    },
+    "fields": {
+      "title": "Fields",
+      "type": "array",
+      "description": "Enter the fields you want to be exported to the CSV.",
+      "prefill": ["title", "url", "price"],
+      "editor": "stringList"
+    },
+    "maxItems": {
+      "title": "Max items",
+      "type": "integer",
+      "description": "Fill the maximum number of items to export.",
+      "default": 100
+    }
+  },
+  "required": ["useClient", "memory", "fields", "maxItems"]
+}

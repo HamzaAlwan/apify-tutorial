@@ -5,6 +5,17 @@ const {
 
 require('dotenv').config();
 
+const asinsData = await Apify.getValue("ASINS_DATA") || {};
+
+Apify.events.on('migrating', async () => {
+    await Apify.setValue("ASINS_DATA", asinsData);
+});
+
+// Log the Asins data every 20 seconds
+setInterval(() => {
+	log.info(`[ASINS]: Current asins data.`, asinsData);
+}, 20000);
+
 exports.SEARCH = async ({ $ }, { requestQueue }) => {
 	const items = $("div[data-asin][data-component-type*=search-result]");
 
@@ -29,6 +40,9 @@ exports.ITEM = async ({ $, request }, { requestQueue }) => {
 	let asin = request.userData.asin;
 
 	log.info(`[OFFERS]: Adding ${asin} item offers to requestQueue...`);
+
+	// Save number of offers for each asin
+	asinsData[asin] = asinsData[asin] ? asinsData[asin] + 1 : 1;
 
 	requestQueue.addRequest({
 		url: `https://www.amazon.com/gp/offer-listing/${asin}`,

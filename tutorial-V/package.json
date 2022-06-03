@@ -1,0 +1,16 @@
+{
+	"name": "tutorial_2",
+	"version": "0.0.1",
+	"description": "Tutorial II Apify SDK",
+	"dependencies": {
+		"apify": "^2.3.0",
+		"axios": "^0.27.2",
+		"dotenv": "^16.0.0"
+	},
+	"scripts": {
+		"start": "node main.js",
+		"test": "echo \"Error: oops, the actor has no tests yet, sad!\" && exit 1"
+	},
+	"author": "HamzaAlwan",
+	"license": "ISC"
+}

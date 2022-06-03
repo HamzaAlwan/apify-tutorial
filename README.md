@@ -46,3 +46,66 @@
 - How does the FROM command work and which base images Apify provides?
     - The `FROM` command initializes a new build stage and sets the `Base Image` for subsequent instructions.
     - Apify provide NodeJs images.
+
+## Tutorial IV Apify SDK:
+
+- Do you have to rebuild an actor each time the source code is changed?
+    - Yes, because we need to rebuild the docker image.
+- What is the difference between pushing your code changes and creating a pull request?
+    - Pushing the code directly merges the changes with the branch the changes are pushed to.
+    - Creating a pull request send a request to the repository owner to merge the changes, to any branch, where we can compare the changes with the branch we want to merge the changes to.
+- How does the apify push command work? Is it worth using, in your opinion?
+    - This command uploads your project to the Apify cloud and builds an actor from it. Yes some times it worth using since it does multiple steps at once.
+
+## Tutorial V Apify SDK:
+
+- What is the relationship between actor and task?
+    - Tasks let you create multiple re-usable configurations of a single actor that are adapted for specific use cases.
+- What are the differences between default (unnamed) and named storage? Which one would you choose for everyday usage?
+    - Named and unnamed storages are the same in all regards except their retention period. The only difference is that named storages make it easier to verify you are using the correct store.
+    - I would choose the unnamed storage, unless I need the data to be persistent.
+- What is the relationship between the Apify API and the Apify client? Are there any significant differences?
+    - Apify is the official library to access Apify API from your JavaScript applications and it provides useful features like automatic retries and convenience functions that improve the experience of using the Apify API.
+- Is it possible to use a request queue for deduplication of product IDs? If yes, how would you do that?
+    - Yes, you can use a `RequestQueue` to deduplicate product IDs, it automatically ignores duplicate urls.
+- What is data retention and how does it work for all types of storage (default and named)?
+    - Data retention is a time period after which data is deleted from the storage, unnamed storages expire after 7 days unless otherwise specified. Named storages are retained indefinitely.
+- How do you pass input when running an actor or task via the API?
+    - You can pass the input as the body of the request as a JSON object.
+
+
+## Tutorial VI Apify SDK:
+
+- What types of proxies does the Apify Proxy include? What are the main differences between them?
+    - Datacenter proxy, Residential proxy and Google SERP proxy.
+- Which proxies (proxy groups) can users access with the Apify Proxy trial? How long does this trial last?
+    - Shared proxy groups, the trial lasts for 30 days.
+- How can you prevent a problem that one of the hardcoded proxy groups that a user is using stops working (a problem with a provider)? What should be the best practices?
+    -
+- Does it make sense to rotate proxies when you are logged in?
+    - No.
+- Construct a proxy URL that will select proxies only from the US (without specific groups).
+- What do you need to do to rotate proxies (one proxy usually has one IP)? How does this differ for Cheerio Scraper and Puppeteer Scraper?
+    - Because the IP address might become blocked or banned.
+- Try to set up the Apify Proxy (using any group or auto) in your browser. This is useful for testing how websites behave with proxies from specific countries (although most are from the US). You can try Switchy Omega extension but there are many more. Were you successful?
+    - 
+- Name a few different ways a website can prevent you from scraping it.
+    - IP detection, IP rate limiting, Browser detection, and Tracking user behavior.
+
+- Do you know any software companies that develop anti-scraping solutions? Have you ever encountered them on a website?
+    - No, captcha.
+
+
+## Tutorial VII Apify SDK:
+- Actors have a Restart on error option in their Settings. Would you use this for your regular actors? Why? When would you use it, and when not?
+    - No, since it will probably fail again for the same error if not handled.
+    - I will use it only for some testing (like to see if an error is reproducable).
+-  Migrations happen randomly, but by setting Restart on error and then throwing an error in the main process, you can force a similar situation. Observe what happens. What changes and what stays the same in a restarted actor run?
+    - 
+- Why don't you usually need to add any special code to handle migrations in normal crawling/scraping? Is there a component that essentially solves this problem for you?
+    - The Apify SDK persists its state automatically, using the `migrating` and `persistState` events. persistState notifies SDK components to persist their state at regular intervals in case a migration happens. The migrating event is emitted just before a migration.
+- How can you intercept the migration event? How much time do you need after this takes place and before the actor migrates?
+    - We can intercept the migration event using `Apify.events.on('migrating', () => {...}).`
+    - When a migration event occurs, you only have a few seconds to save your work.
+- When would you persist data to a default key-value store and when would you use a named key-value store?
+    - I would presest the final data that I need from the actor run in a named key-value store, other wise I would have to persist the data in a default key-value store.

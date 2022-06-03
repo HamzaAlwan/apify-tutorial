@@ -23,7 +23,7 @@ Apify.main(async () => {
     });
 
     const proxyConfiguration = await Apify.createProxyConfiguration({
-        groups: ['RESIDENTIAL'],
+        groups: ['BUYPROXIES94952']
     });
 
     const router = tools.createRouter({ requestQueue });
@@ -32,25 +32,12 @@ Apify.main(async () => {
         requestQueue,
         proxyConfiguration,
         useSessionPool: true,
-        maxConcurrency: 30,
-        browserPoolOptions: {
-            useFingerprints: true,
-            fingerprintsOptions: {
-                fingerprintGeneratorOptions: {
-                    browsers: [
-                        { name: 'chrome', minVersion: 93 },
-                        { name: 'firefox', minVersion: 93 },
-                    ],
-                    devices: [
-                        'desktop',
-                    ],
-                    operatingSystems: [
-                        'windows',
-                        'macos'
-                    ],
-                },
+        sessionPoolOptions: {
+            sessionOptions: {
+                maxUsageCount: 5
             },
         },
+        maxConcurrency: 5,
 
         handlePageFunction: async context => {
             const { page, request } = context;
@@ -62,11 +49,10 @@ Apify.main(async () => {
             } catch (err) {
                 const randomNumber = Math.random();
                 const key = `ERROR-LOGIN-${randomNumber}`;
-                await saveSnapshot(page, { key });
+                await saveSnapshot(page, { key, saveHtml: true });
 
                 log.error(`[${request.userData.label}]: Error Occured while crawling: ${request.loadedUrl}.`);
 
-                console.error("ERROR ERROR", err)
                 throw new Error(err);
             }
         },
